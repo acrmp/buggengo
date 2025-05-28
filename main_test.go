@@ -67,6 +67,15 @@ var _ = Describe("buggengo", func() {
 				Expect(c["file_path"]).ToNot(HaveSuffix("_test.go"))
 			}
 		})
+
+		It("only includes functions of a minimum complexity", func() {
+			Expect(candidates).To(ConsistOf(
+				HaveKeyWithValue("func_name", "RESTWithNext"),
+				HaveKeyWithValue("func_name", "handleResponse"),
+				HaveKeyWithValue("func_name", "EndpointNeedsScopes"),
+				HaveKeyWithValue("func_name", "generateScopesSuggestion"),
+			))
+		})
 	})
 
 	Context("when the strategy is not provided", func() {

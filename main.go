@@ -45,6 +45,10 @@ func main() {
 		ast.Inspect(sourceFile, func(n ast.Node) bool {
 			switch candidateFunc := n.(type) {
 			case *ast.FuncDecl:
+				if calcSimpleComplexity(candidateFunc) < 3 {
+					return false
+				}
+
 				lineStart := fset.Position(candidateFunc.Pos()).Line
 				lineEnd := fset.Position(candidateFunc.End()).Line
 
@@ -93,6 +97,29 @@ func main() {
 		log.Fatalf("Problem marshalling candidates: %v\n", err)
 	}
 	fmt.Println(string(b))
+}
+
+func calcSimpleComplexity(f *ast.FuncDecl) int {
+	complexity := 0
+	ast.Inspect(f, func(n ast.Node) bool {
+		switch n.(type) {
+		case *ast.BinaryExpr,
+			*ast.BranchStmt,
+			*ast.DeferStmt,
+			*ast.ForStmt,
+			*ast.GoStmt,
+			*ast.IfStmt,
+			*ast.IncDecStmt,
+			*ast.RangeStmt,
+			*ast.SelectStmt,
+			*ast.SendStmt,
+			*ast.SwitchStmt,
+			*ast.TypeSwitchStmt:
+			complexity++
+		}
+		return true
+	})
+	return complexity
 }
 
 func formatCode(fs *token.FileSet, nodeToOutput any, funcToModify *ast.FuncDecl, modFunc func(*ast.FuncDecl)) (*bytes.Buffer, error) {
